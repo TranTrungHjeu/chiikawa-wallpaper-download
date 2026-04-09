@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import {
   CheckCircle,
-  Sparkle,
+  CircleNotch,
   UploadSimple,
   WarningCircle,
   X,
@@ -168,6 +168,9 @@ export function QuickContributionButton({
   const [feedback, setFeedback] = useState<FeedbackState | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   const turnstileEnabled = useMemo(() => Boolean(turnstileSiteKey), [turnstileSiteKey]);
+  const pendingIcon = (
+    <CircleNotch className="h-4 w-4 animate-spin text-[var(--color-sakura)]" weight="bold" />
+  );
 
   useEffect(() => {
     setIsMounted(true);
@@ -322,7 +325,7 @@ export function QuickContributionButton({
           )}
         >
           {pending ? (
-            <Sparkle className="h-4 w-4" weight="fill" />
+            pendingIcon
           ) : (
             <UploadSimple className="h-4 w-4" weight="bold" />
           )}
@@ -337,7 +340,7 @@ export function QuickContributionButton({
           disabled={pending || disabled}
           icon={
             pending ? (
-              <Sparkle className="h-4 w-4" weight="fill" />
+              pendingIcon
             ) : (
               <UploadSimple className="h-4 w-4" weight="bold" />
             )

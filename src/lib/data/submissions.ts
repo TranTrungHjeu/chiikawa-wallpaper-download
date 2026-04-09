@@ -98,7 +98,11 @@ export async function getAdminSubmissionsPage(
   pageSize = ADMIN_PAGE_SIZE
 ) {
   if (!isServiceSupabaseConfigured()) {
-    return paginateArray(mockSubmissions, page, pageSize) as PagedResult<SubmissionRecord>;
+    return paginateArray(
+      mockSubmissions.filter((submission) => submission.status === "pending"),
+      page,
+      pageSize
+    ) as PagedResult<SubmissionRecord>;
   }
 
   const supabase = getSupabaseServiceClient();
@@ -107,6 +111,7 @@ export async function getAdminSubmissionsPage(
   const { data, count, error } = await supabase
     .from("submissions")
     .select("*", { count: "exact" })
+    .eq("status", "pending")
     .order("created_at", { ascending: false })
     .range(from, to);
 

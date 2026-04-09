@@ -201,19 +201,32 @@ export async function getRelatedAssets(asset: AssetRecord, limit = 3) {
     .slice(0, limit);
 }
 
-export async function getAdminAssetsPage(page = 1, pageSize = ADMIN_PAGE_SIZE) {
+export async function getAdminAssetsPage(
+  page = 1,
+  pageSize = ADMIN_PAGE_SIZE,
+  kind?: AssetKind
+) {
   if (!isServiceSupabaseConfigured()) {
-    return paginateArray(mockAssets, page, pageSize);
+    const filtered = kind
+      ? mockAssets.filter((asset) => asset.kind === kind)
+      : mockAssets;
+
+    return paginateArray(filtered, page, pageSize);
   }
 
   const supabase = getSupabaseServiceClient();
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
-  const { data, count, error } = await supabase
+  let query = supabase
     .from("assets")
     .select("*", { count: "exact" })
-    .order("created_at", { ascending: false })
-    .range(from, to);
+    .order("created_at", { ascending: false });
+
+  if (kind) {
+    query = query.eq("kind", kind);
+  }
+
+  const { data, count, error } = await query.range(from, to);
 
   if (error) {
     throw error;

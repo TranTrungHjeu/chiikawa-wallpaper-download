@@ -2,7 +2,7 @@
 
 import { startTransition, useState } from "react";
 import { useRouter } from "next/navigation";
-import { LockKeyhole, LogIn } from "lucide-react";
+import { CircleNotch, LockKey, SignIn } from "@phosphor-icons/react";
 
 import { Button } from "@/components/ui/button";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
@@ -45,41 +45,45 @@ export function AdminLoginForm({ disabled = false }: { disabled?: boolean }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-5 rounded-[2rem] bg-white/85 p-6 shadow-cute backdrop-blur"
+      className="space-y-5 border border-white/70 bg-white/90 p-6 shadow-[0_18px_50px_rgba(37,48,74,0.08)] backdrop-blur"
     >
       <div className="space-y-2">
-        <p className="text-xs font-black uppercase tracking-[0.22em] text-slate-500">
+        <p className="text-[11px] font-black uppercase tracking-[0.28em] text-slate-400">
           Admin access
         </p>
-        <h2 className="headline-display text-3xl text-[var(--color-ink)]">
-          Duyệt contribution trong một nơi gọn gàng.
+        <h2 className="text-3xl font-black tracking-[-0.03em] text-[var(--color-ink)]">
+          Đăng nhập quản trị
         </h2>
       </div>
 
       <label className="block space-y-2">
-        <span className="text-sm font-bold text-slate-700">Email</span>
+        <span className="text-sm font-black uppercase tracking-[0.12em] text-slate-500">
+          Email
+        </span>
         <input
           required
           type="email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
-          className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 outline-none transition focus:border-[var(--color-sky)]"
+          className="h-12 w-full border border-slate-200 bg-white px-4 outline-none transition focus:border-[var(--color-sakura)]"
         />
       </label>
 
       <label className="block space-y-2">
-        <span className="text-sm font-bold text-slate-700">Mật khẩu</span>
+        <span className="text-sm font-black uppercase tracking-[0.12em] text-slate-500">
+          Mật khẩu
+        </span>
         <input
           required
           type="password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 outline-none transition focus:border-[var(--color-sky)]"
+          className="h-12 w-full border border-slate-200 bg-white px-4 outline-none transition focus:border-[var(--color-sakura)]"
         />
       </label>
 
       {error ? (
-        <div className="rounded-2xl bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
+        <div className="border border-rose-100 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
           {error}
         </div>
       ) : null}
@@ -88,10 +92,20 @@ export function AdminLoginForm({ disabled = false }: { disabled?: boolean }) {
         type="submit"
         className="w-full"
         disabled={pending || disabled}
-        icon={pending ? <LockKeyhole className="h-4 w-4" /> : <LogIn className="h-4 w-4" />}
+        icon={
+          pending ? (
+            <CircleNotch className="h-4 w-4 animate-spin" weight="bold" />
+          ) : (
+            <SignIn className="h-4 w-4" weight="bold" />
+          )
+        }
       >
         {pending ? "Đang đăng nhập..." : "Đăng nhập admin"}
       </Button>
+      <div className="flex items-center gap-2 border-t border-slate-100 pt-4 text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
+        <LockKey className="h-4 w-4" weight="bold" />
+        Chỉ tài khoản admin mới truy cập được.
+      </div>
     </form>
   );
 }

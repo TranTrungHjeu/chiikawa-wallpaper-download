@@ -2,7 +2,7 @@
 
 import { startTransition, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, X } from "lucide-react";
+import { Check, CircleNotch, Trash } from "@phosphor-icons/react";
 
 import { Button } from "@/components/ui/button";
 
@@ -15,9 +15,6 @@ export function ModerationActions({
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState<"approve" | "reject" | null>(null);
-  const [rejectReason, setRejectReason] = useState(
-    "Chưa phù hợp với chất lượng hoặc chủ đề bộ sưu tập."
-  );
   const [error, setError] = useState<string | null>(null);
 
   async function callAction(action: "approve" | "reject") {
@@ -32,10 +29,7 @@ export function ModerationActions({
         headers: {
           "Content-Type": "application/json",
         },
-        body:
-          action === "reject"
-            ? JSON.stringify({ reason: rejectReason })
-            : JSON.stringify({}),
+        body: JSON.stringify({}),
       });
 
       if (!response.ok) {
@@ -57,30 +51,36 @@ export function ModerationActions({
 
   return (
     <div className="space-y-3">
-      <div className="grid gap-2 md:grid-cols-[1fr_auto_auto]">
-        <input
-          value={rejectReason}
-          onChange={(event) => setRejectReason(event.target.value)}
-          className="h-11 rounded-2xl border border-slate-200 bg-white px-4 text-sm outline-none focus:border-[var(--color-sky)]"
-          placeholder="Lý do từ chối"
-          disabled={disabled || busy !== null}
-        />
+      <div className="flex flex-wrap items-center gap-2">
         <Button
           type="button"
-          variant="secondary"
+          variant="ghost"
           size="sm"
           onClick={() => callAction("reject")}
           disabled={disabled || busy !== null}
-          icon={<X className="h-4 w-4" />}
+          icon={
+            busy === "reject" ? (
+              <CircleNotch className="h-4 w-4 animate-spin" weight="bold" />
+            ) : (
+              <Trash className="h-4 w-4" weight="bold" />
+            )
+          }
         >
-          {busy === "reject" ? "Đang từ chối..." : "Từ chối"}
+          {busy === "reject" ? "Đang xoá..." : "Từ chối"}
         </Button>
         <Button
           type="button"
+          variant="blush"
           size="sm"
           onClick={() => callAction("approve")}
           disabled={disabled || busy !== null}
-          icon={<Check className="h-4 w-4" />}
+          icon={
+            busy === "approve" ? (
+              <CircleNotch className="h-4 w-4 animate-spin" weight="bold" />
+            ) : (
+              <Check className="h-4 w-4" weight="bold" />
+            )
+          }
         >
           {busy === "approve" ? "Đang duyệt..." : "Duyệt"}
         </Button>

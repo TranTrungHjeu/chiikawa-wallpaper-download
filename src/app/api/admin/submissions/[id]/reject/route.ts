@@ -1,13 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 import { getAdminSession } from "@/lib/auth";
+import { PENDING_BUCKET } from "@/lib/constants";
 import { getSubmissionById } from "@/lib/data/submissions";
 import { isServiceSupabaseConfigured } from "@/lib/env";
-import { rejectSubmissionSchema } from "@/lib/validation";
 import { getSupabaseServiceClient } from "@/lib/supabase/service";
 
 export async function POST(
-  request: NextRequest,
+  _request: Request,
   context: { params: Promise<{ id: string }> }
 ) {
   if (!isServiceSupabaseConfigured()) {
@@ -20,16 +20,6 @@ export async function POST(
   const adminSession = await getAdminSession();
   if (!adminSession) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const body = await request.json().catch(() => null);
-  const parsed = rejectSubmissionSchema.safeParse(body);
-
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: parsed.error.issues[0]?.message || "Payload không hợp lệ." },
-      { status: 400 }
-    );
   }
 
   const { id } = await context.params;
@@ -48,17 +38,21 @@ export async function POST(
 
   try {
     const supabase = getSupabaseServiceClient();
-    const { error } = await supabase
+    const { error: deleteSubmissionError } = await supabase
       .from("submissions")
-      .update({
-        status: "rejected",
-        reviewed_at: new Date().toISOString(),
-        review_note: parsed.data.reason,
-      })
+      .delete()
       .eq("id", submission.id);
 
-    if (error) {
-      throw error;
+    if (deleteSubmissionError) {
+      throw deleteSubmissionError;
+    }
+
+    const { error: removePendingError } = await supabase.storage
+      .from(PENDING_BUCKET)
+      .remove([submission.storage_path]);
+
+    if (removePendingError) {
+      console.error("Could not remove rejected pending file", removePendingError);
     }
 
     return NextResponse.json({ ok: true });

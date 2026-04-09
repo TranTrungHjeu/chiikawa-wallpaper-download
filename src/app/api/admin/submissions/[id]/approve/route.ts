@@ -101,20 +101,21 @@ export async function POST(
       throw insertError ?? new Error("Không thể tạo asset public.");
     }
 
-    const insertedAsset = asset as { id: string };
-
-    const { error: updateError } = await supabase
+    const { error: deleteSubmissionError } = await supabase
       .from("submissions")
-      .update({
-        status: "approved",
-        approved_asset_id: insertedAsset.id,
-        reviewed_at: new Date().toISOString(),
-        review_note: null,
-      })
+      .delete()
       .eq("id", submission.id);
 
-    if (updateError) {
-      throw updateError;
+    if (deleteSubmissionError) {
+      throw deleteSubmissionError;
+    }
+
+    const { error: removePendingError } = await supabase.storage
+      .from(PENDING_BUCKET)
+      .remove([submission.storage_path]);
+
+    if (removePendingError) {
+      console.error("Could not remove approved pending file", removePendingError);
     }
 
     revalidateTag("assets", "max");
