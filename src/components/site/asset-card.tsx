@@ -164,15 +164,22 @@ export function AssetCard({
             className="absolute inset-0 z-10"
           />
 
-          <div className="absolute inset-x-0 top-0 z-20 flex items-start p-3">
+          <div className="absolute inset-x-0 top-0 z-20 flex items-start justify-between p-2.5 md:p-3">
             <Badge className="bg-white/82 text-[11px] text-slate-700">
               {getKindLabel(asset.kind)}
             </Badge>
+            <a
+              href={getAssetDownloadRoute(asset.id)}
+              aria-label={`Download ${asset.title}`}
+              className="pointer-events-auto inline-flex h-9 w-9 items-center justify-center bg-[var(--color-ink)]/90 text-white shadow-[0_10px_24px_rgba(37,48,74,0.18)] md:hidden"
+            >
+              <DownloadSimple className="h-4 w-4" weight="bold" />
+            </a>
           </div>
 
           <div className="pointer-events-none absolute inset-0 bg-slate-950/26 opacity-0 transition duration-300 md:group-hover:opacity-100 md:group-focus-within:opacity-100" />
 
-          <div className="absolute inset-x-3 bottom-3 z-20 flex translate-y-0 items-center gap-2 opacity-100 transition duration-300 md:translate-y-2 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 md:group-focus-within:translate-y-0 md:group-focus-within:opacity-100">
+          <div className="absolute inset-x-3 bottom-3 z-20 hidden translate-y-2 items-center gap-2 opacity-0 transition duration-300 md:flex md:group-hover:translate-y-0 md:group-hover:opacity-100 md:group-focus-within:translate-y-0 md:group-focus-within:opacity-100">
             <button
               type="button"
               onClick={openPreview}

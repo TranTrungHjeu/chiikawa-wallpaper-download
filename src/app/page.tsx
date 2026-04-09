@@ -36,15 +36,19 @@ export default async function HomePage() {
 
   return (
     <SiteShell currentPath="/">
-      <section className="px-4 pb-12 pt-4 md:px-8">
-        <div className="mx-auto max-w-7xl space-y-8">
+      <section className="px-3 pb-8 pt-2 md:px-8 md:pb-12 md:pt-4">
+        <div className="mx-auto max-w-7xl space-y-5 md:space-y-8">
           <SectionHeading
             eyebrow="Featured"
             title="Nổi bật"
             action={
               <Link
                 href="/desktop"
-                className={linkButtonClassName({ variant: "secondary", size: "md" })}
+                className={linkButtonClassName({
+                  variant: "secondary",
+                  size: "md",
+                  className: "w-full justify-center md:w-auto",
+                })}
               >
                 Xem tất cả
               </Link>
@@ -54,15 +58,19 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="px-4 py-12 md:px-8">
-        <div className="mx-auto max-w-7xl space-y-8">
+      <section className="px-3 py-8 md:px-8 md:py-12">
+        <div className="mx-auto max-w-7xl space-y-5 md:space-y-8">
           <SectionHeading
             eyebrow="Latest"
             title="Mới lên"
             action={
               <Link
                 href="/mobile"
-                className={linkButtonClassName({ variant: "secondary", size: "md" })}
+                className={linkButtonClassName({
+                  variant: "secondary",
+                  size: "md",
+                  className: "w-full justify-center md:w-auto",
+                })}
               >
                 Xem tất cả
               </Link>
@@ -75,17 +83,22 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="px-4 py-12 md:px-8">
-        <div className="poster-surface mx-auto grid max-w-7xl gap-6 rounded-none border border-white/70 px-6 py-8 md:grid-cols-[1.2fr_0.8fr] md:px-10 md:py-10">
-          <div className="space-y-2">
-            <p className="text-xs font-black uppercase tracking-[0.22em] text-slate-500">Contribution</p>
-            <h2 className="headline-display text-4xl text-[var(--color-ink)] md:text-5xl">Đóng góp nhanh</h2>
+      <section className="px-3 py-8 md:px-8 md:py-12">
+        <div className="poster-surface mx-auto grid max-w-7xl gap-4 rounded-none border border-white/70 px-4 py-5 md:grid-cols-[1.2fr_0.8fr] md:px-10 md:py-10">
+          <div className="space-y-1.5">
+            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-slate-500">
+              Contribution
+            </p>
+            <h2 className="headline-display text-3xl text-[var(--color-ink)] md:text-5xl">
+              Đóng góp nhanh
+            </h2>
           </div>
           <div className="flex items-center justify-start md:justify-end">
             <QuickContributionButton
               label="Chọn ảnh và gửi"
               variant="primary"
-              size="lg"
+              size="md"
+              className="w-full md:w-auto"
               disabled={!contributionEnabled}
               turnstileSiteKey={turnstileSiteKey}
             />

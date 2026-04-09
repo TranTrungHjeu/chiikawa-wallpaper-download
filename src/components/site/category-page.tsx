@@ -33,31 +33,31 @@ export function CategoryPage({
   return (
     <SiteShell currentPath={currentPath}>
       {headerMode === "full" ? (
-        <section className="px-4 pb-8 pt-4 md:px-8">
-          <div className="poster-surface mx-auto max-w-7xl rounded-none border border-white/70 px-6 py-8 md:px-10 md:py-10">
+        <section className="px-3 pb-6 pt-2 md:px-8 md:pb-8 md:pt-4">
+          <div className="poster-surface mx-auto max-w-7xl rounded-none border border-white/70 px-4 py-5 md:px-10 md:py-10">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-              <div className="max-w-3xl space-y-4">
-                <h1 className="headline-display text-5xl leading-[0.92] text-[var(--color-ink)] md:text-7xl">
+              <div className="max-w-3xl space-y-2.5 md:space-y-4">
+                <h1 className="headline-display text-4xl leading-[0.92] text-[var(--color-ink)] md:text-7xl">
                   {title}
                 </h1>
                 {description ? (
-                  <p className="max-w-xl text-sm leading-7 text-slate-600 md:text-base">
+                  <p className="max-w-xl text-sm leading-6 text-slate-600 md:text-base md:leading-7">
                     {description}
                   </p>
                 ) : null}
               </div>
 
-              <div className="flex flex-wrap gap-3">
-                <div className="bg-white/90 px-4 py-3 text-sm font-bold text-[var(--color-ink)]">
+              <div className="flex flex-wrap gap-2.5 md:gap-3">
+                <div className="bg-white/90 px-3 py-2.5 text-sm font-bold text-[var(--color-ink)]">
                   Trang {pageResult.page} / {pageResult.pageCount}
                 </div>
-                <div className="bg-white/90 px-4 py-3 text-sm font-bold text-[var(--color-ink)]">
+                <div className="bg-white/90 px-3 py-2.5 text-sm font-bold text-[var(--color-ink)]">
                   {pageResult.total} asset
                 </div>
                 <QuickContributionButton
                   label="Gửi ảnh"
                   variant="secondary"
-                  size="md"
+                  size="sm"
                   compact
                   disabled={!contributionEnabled}
                   turnstileSiteKey={turnstileSiteKey}
@@ -67,7 +67,7 @@ export function CategoryPage({
           </div>
         </section>
       ) : (
-        <section className="px-4 pb-5 pt-4 md:px-8">
+        <section className="px-3 pb-4 pt-2 md:px-8 md:pb-5 md:pt-4">
           <div className="mx-auto max-w-7xl">
             <Pagination
               basePath={currentPath}
@@ -78,8 +78,8 @@ export function CategoryPage({
         </section>
       )}
 
-      <section className="px-4 pb-12 md:px-8">
-        <div className="mx-auto max-w-7xl space-y-6">
+      <section className="px-3 pb-10 md:px-8 md:pb-12">
+        <div className="mx-auto max-w-7xl space-y-5 md:space-y-6">
           <GalleryPrefetch targets={prefetchTargets} gridPreset={gridPreset} />
           <AssetGrid assets={pageResult.items} gridPreset={gridPreset} />
           {headerMode === "full" ? (

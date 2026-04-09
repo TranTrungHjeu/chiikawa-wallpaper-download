@@ -67,7 +67,7 @@ export function AssetGrid({
   return (
     <div
       className={cn(
-        "grid gap-3",
+        "grid gap-2.5 md:gap-3",
         gridPreset === "desktop-two-up" || gridPreset === "home-featured-two-up"
           ? "grid-cols-1 md:grid-cols-2"
           : gridPreset === "home-latest-five-up"
