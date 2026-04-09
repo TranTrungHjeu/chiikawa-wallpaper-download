@@ -1,36 +1,110 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Chiikawa Kho Hình Nền
 
-## Getting Started
+Một bản mirror theo phong cách cute-editorial cho `chiikawa-wallpaper.com`, build bằng `Next.js App Router`, lưu metadata ở `Supabase`, file gốc public ở `Supabase Storage`, và có moderation flow cho contribution từ người dùng.
 
-First, run the development server:
+## Stack
+
+- `Next.js 16` + `React 19`
+- `Tailwind CSS 4`
+- `Supabase Auth + Database + Storage`
+- `Vitest`
+
+## Tính năng chính
+
+- Trang public:
+  - `/`
+  - `/mobile`
+  - `/desktop`
+  - `/gif`
+  - `/asset/[slug]`
+  - `/contribute`
+- Trang admin:
+  - `/admin/login`
+  - `/admin/submissions`
+  - `/admin/assets`
+- API:
+  - `POST /api/submissions/upload-url`
+  - `POST /api/submissions/complete`
+  - `POST /api/admin/submissions/[id]/approve`
+  - `POST /api/admin/submissions/[id]/reject`
+  - `GET /api/assets/[id]/download`
+
+## Cài đặt
+
+```bash
+npm install
+cp .env.example .env
+```
+
+Điền các biến trong `.env`:
+
+```env
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+
+TURNSTILE_SITE_KEY=
+TURNSTILE_SECRET_KEY=
+
+ADMIN_SEED_EMAIL=
+ADMIN_SEED_PASSWORD=
+```
+
+## Supabase
+
+Chạy migration trong `supabase/migrations/202604090201_init.sql` để tạo:
+
+- `assets`
+- `submissions`
+- `admin_users`
+- bucket private `submission-pending`
+
+Chạy thêm migration `supabase/migrations/202604090900_assets_storage.sql` để tạo:
+
+- bucket public `public-assets`
+- cột `storage_bucket`
+- cột `storage_path`
+
+Sau đó seed admin:
+
+```bash
+npm run seed:admin
+```
+
+## Import dữ liệu từ site nguồn
+
+Script importer crawl HTML SSR của site nguồn, tải file gốc vào `.cache/imports/chiikawa/`, upload lại lên bucket public của Supabase, rồi insert metadata vào `assets`.
+
+```bash
+npm run import:chiikawa
+```
+
+Giới hạn số item để thử nhanh:
+
+```bash
+npm run import:chiikawa -- --limit=5
+```
+
+## Chạy local
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Kiểm tra
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run lint
+npm run typecheck
+npm run test
+npm run build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Ghi chú triển khai
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Thumbnail/listing dùng URL public từ Supabase Storage, còn tối ưu ảnh khi render được xử lý bởi `next/image`.
+- Download route luôn stream lại file gốc từ nguồn lưu trữ để giữ chất lượng cao.
+- Nếu thiếu env Supabase, app vẫn build được nhưng contribution, admin và importer sẽ hiện trạng thái setup.
+- Không commit secret thật vào repo. Nếu secret từng bị chia sẻ ở nơi khác, nên rotate sau khi triển khai.

@@ -1,0 +1,252 @@
+import { unstable_cache } from "next/cache";
+
+import {
+  ADMIN_PAGE_SIZE,
+  CACHE_REVALIDATE_SECONDS,
+  GALLERY_PAGE_SIZE,
+} from "@/lib/constants";
+import { isServiceSupabaseConfigured } from "@/lib/env";
+import { mockAssets, mockStats } from "@/lib/mock/assets";
+import { getSupabaseServiceClient } from "@/lib/supabase/service";
+import type { AssetKind, AssetRecord, GalleryStats, PagedResult } from "@/lib/types";
+import { paginateArray } from "@/lib/utils";
+
+function normalizeAsset(asset: Partial<AssetRecord>): AssetRecord {
+  return {
+    id: String(asset.id ?? ""),
+    source_id: asset.source_id ?? null,
+    title: asset.title ?? "",
+    slug: asset.slug ?? "",
+    description: asset.description ?? null,
+    kind: (asset.kind as AssetKind) ?? "mobile",
+    width: asset.width ?? null,
+    height: asset.height ?? null,
+    format: asset.format ?? null,
+    bytes: asset.bytes ?? null,
+    cloudinary_public_id: asset.cloudinary_public_id ?? null,
+    cloudinary_resource_type: asset.cloudinary_resource_type ?? null,
+    storage_bucket: asset.storage_bucket ?? null,
+    storage_path: asset.storage_path ?? null,
+    secure_url: asset.secure_url ?? null,
+    original_url: asset.original_url ?? null,
+    status: asset.status ?? "published",
+    featured: Boolean(asset.featured),
+    created_at: asset.created_at ?? new Date().toISOString(),
+    updated_at: asset.updated_at ?? new Date().toISOString(),
+  };
+}
+
+async function queryAssets(
+  kind?: AssetKind,
+  page = 1,
+  pageSize = GALLERY_PAGE_SIZE
+) {
+  if (!isServiceSupabaseConfigured()) {
+    const filtered = mockAssets
+      .filter((asset) => (kind ? asset.kind === kind : true))
+      .filter((asset) => asset.status === "published")
+      .sort((a, b) => Number(b.featured) - Number(a.featured));
+
+    return paginateArray(filtered, page, pageSize);
+  }
+
+  const supabase = getSupabaseServiceClient();
+  let query = supabase
+    .from("assets")
+    .select("*", { count: "exact" })
+    .eq("status", "published")
+    .order("featured", { ascending: false })
+    .order("created_at", { ascending: false });
+
+  if (kind) {
+    query = query.eq("kind", kind);
+  }
+
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+  const { data, count, error } = await query.range(from, to);
+
+  if (error) {
+    throw error;
+  }
+
+  return {
+    items: (data ?? []).map((item) => normalizeAsset(item)),
+    total: count ?? 0,
+    page,
+    pageSize,
+    pageCount: Math.max(1, Math.ceil((count ?? 0) / pageSize)),
+  } satisfies PagedResult<AssetRecord>;
+}
+
+export async function getAssetsPage(
+  kind?: AssetKind,
+  page = 1,
+  pageSize = GALLERY_PAGE_SIZE
+) {
+  return unstable_cache(
+    async () => queryAssets(kind, page, pageSize),
+    ["assets-page", kind ?? "all", String(page), String(pageSize)],
+    {
+      revalidate: CACHE_REVALIDATE_SECONDS,
+      tags: ["assets", kind ? `assets:${kind}` : "assets:all"],
+    }
+  )();
+}
+
+export async function getFeaturedAssets(limit = 6) {
+  return unstable_cache(
+    async () => {
+      const page = await queryAssets(undefined, 1, 48);
+      return page.items.slice(0, limit);
+    },
+    ["featured-assets", String(limit)],
+    {
+      revalidate: CACHE_REVALIDATE_SECONDS,
+      tags: ["assets", "assets:featured"],
+    }
+  )();
+}
+
+export async function getAssetsStats(): Promise<GalleryStats> {
+  return unstable_cache(
+    async () => {
+      if (!isServiceSupabaseConfigured()) {
+        return mockStats;
+      }
+
+      const supabase = getSupabaseServiceClient();
+      const { data, error } = await supabase
+        .from("assets")
+        .select("kind")
+        .eq("status", "published");
+
+      if (error) {
+        throw error;
+      }
+
+      const counts = { mobile: 0, desktop: 0, gif: 0 };
+      for (const row of data ?? []) {
+        const kind = row.kind as AssetKind;
+        counts[kind] += 1;
+      }
+
+      return {
+        totalAssets: counts.mobile + counts.desktop + counts.gif,
+        totalMobile: counts.mobile,
+        totalDesktop: counts.desktop,
+        totalGif: counts.gif,
+      };
+    },
+    ["assets-stats"],
+    {
+      revalidate: CACHE_REVALIDATE_SECONDS,
+      tags: ["assets"],
+    }
+  )();
+}
+
+export async function getAssetBySlug(slug: string) {
+  return unstable_cache(
+    async () => {
+      if (!isServiceSupabaseConfigured()) {
+        return mockAssets.find((asset) => asset.slug === slug) ?? null;
+      }
+
+      const supabase = getSupabaseServiceClient();
+      const { data, error } = await supabase
+        .from("assets")
+        .select("*")
+        .eq("slug", slug)
+        .eq("status", "published")
+        .maybeSingle();
+
+      if (error) {
+        throw error;
+      }
+
+      return data ? normalizeAsset(data) : null;
+    },
+    ["asset-by-slug", slug],
+    {
+      revalidate: CACHE_REVALIDATE_SECONDS,
+      tags: ["assets", `asset:${slug}`],
+    }
+  )();
+}
+
+export async function getAssetById(id: string) {
+  if (!isServiceSupabaseConfigured()) {
+    return mockAssets.find((asset) => asset.id === id) ?? null;
+  }
+
+  const supabase = getSupabaseServiceClient();
+  const { data, error } = await supabase
+    .from("assets")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data ? normalizeAsset(data) : null;
+}
+
+export async function getRelatedAssets(asset: AssetRecord, limit = 3) {
+  const page = await getAssetsPage(asset.kind, 1, 12);
+  return page.items
+    .filter((item) => item.slug !== asset.slug)
+    .slice(0, limit);
+}
+
+export async function getAdminAssetsPage(page = 1, pageSize = ADMIN_PAGE_SIZE) {
+  if (!isServiceSupabaseConfigured()) {
+    return paginateArray(mockAssets, page, pageSize);
+  }
+
+  const supabase = getSupabaseServiceClient();
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+  const { data, count, error } = await supabase
+    .from("assets")
+    .select("*", { count: "exact" })
+    .order("created_at", { ascending: false })
+    .range(from, to);
+
+  if (error) {
+    throw error;
+  }
+
+  return {
+    items: (data ?? []).map((item) => normalizeAsset(item)),
+    total: count ?? 0,
+    page,
+    pageSize,
+    pageCount: Math.max(1, Math.ceil((count ?? 0) / pageSize)),
+  } satisfies PagedResult<AssetRecord>;
+}
+
+export async function getAssetsForSitemap(limit = 1000) {
+  if (!isServiceSupabaseConfigured()) {
+    return mockAssets.slice(0, limit);
+  }
+
+  const supabase = getSupabaseServiceClient();
+  const { data, error } = await supabase
+    .from("assets")
+    .select("slug, updated_at")
+    .eq("status", "published")
+    .order("updated_at", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    throw error;
+  }
+
+  return (data ?? []).map((item) => ({
+    slug: String(item.slug),
+    updated_at: String(item.updated_at),
+  }));
+}
