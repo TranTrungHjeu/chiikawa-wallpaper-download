@@ -1,8 +1,7 @@
 import { AssetGrid } from "@/components/site/asset-grid";
 import { GalleryPrefetch } from "@/components/site/gallery-prefetch";
+import { LazyQuickContributionButton } from "@/components/site/lazy-quick-contribution-button";
 import { Pagination } from "@/components/site/pagination";
-import { QuickContributionButton } from "@/components/site/quick-contribution-button";
-import { SiteShell } from "@/components/site/site-shell";
 import type { PagedResult, AssetRecord } from "@/lib/types";
 import type { AssetGridPreset } from "@/components/site/asset-grid";
 import { getTurnstileSiteKey, isPublicSupabaseConfigured } from "@/lib/env";
@@ -31,7 +30,7 @@ export function CategoryPage({
   const turnstileSiteKey = getTurnstileSiteKey();
 
   return (
-    <SiteShell currentPath={currentPath}>
+    <>
       {headerMode === "full" ? (
         <section className="px-3 pb-6 pt-2 md:px-8 md:pb-8 md:pt-4">
           <div className="poster-surface mx-auto max-w-7xl rounded-none border border-white/70 px-4 py-5 md:px-10 md:py-10">
@@ -54,7 +53,7 @@ export function CategoryPage({
                 <div className="bg-white/90 px-3 py-2.5 text-sm font-bold text-[var(--color-ink)]">
                   {pageResult.total} asset
                 </div>
-                <QuickContributionButton
+                <LazyQuickContributionButton
                   label="Gửi ảnh"
                   variant="secondary"
                   size="sm"
@@ -91,6 +90,6 @@ export function CategoryPage({
           ) : null}
         </div>
       </section>
-    </SiteShell>
+    </>
   );
 }

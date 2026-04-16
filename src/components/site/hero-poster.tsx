@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { DownloadSimple } from "@phosphor-icons/react/dist/ssr";
 
-import { QuickContributionButton } from "@/components/site/quick-contribution-button";
+import { LazyQuickContributionButton } from "@/components/site/lazy-quick-contribution-button";
 import { Badge } from "@/components/ui/badge";
 import { linkButtonClassName } from "@/components/ui/button";
 import { getTurnstileSiteKey, isPublicSupabaseConfigured } from "@/lib/env";
@@ -51,7 +51,7 @@ export function HeroPoster({
                   <DownloadSimple className="h-5 w-5" weight="bold" />
                   {ctaLabel}
                 </a>
-                <QuickContributionButton
+                <LazyQuickContributionButton
                   label="Gửi ảnh"
                   variant="secondary"
                   size="lg"

@@ -1,3 +1,5 @@
+"use client";
+
 import {
   EnvelopeSimple,
   FacebookLogo,
@@ -6,7 +8,7 @@ import {
 
 export function SiteFooter() {
   return (
-    <footer className="px-3 pb-6 pt-8 md:px-8 md:pb-8 md:pt-12">
+    <footer className="deferred-section px-3 pb-6 pt-8 md:px-8 md:pb-8 md:pt-12">
       <div className="mx-auto flex max-w-7xl flex-col gap-3 border border-white/70 bg-white/70 px-4 py-4 backdrop-blur md:flex-row md:items-center md:justify-between md:px-8 md:py-6">
         <div className="space-y-1">
           <p className="text-[11px] font-black uppercase tracking-[0.22em] text-slate-500">

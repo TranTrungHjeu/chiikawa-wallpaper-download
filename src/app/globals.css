@@ -39,6 +39,12 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+main,
+section,
+footer {
+  min-width: 0;
+}
+
 *::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -170,6 +176,11 @@ img {
   transform: translate3d(0, -6px, 0);
 }
 
+.deferred-section {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 720px;
+}
+
 .no-scrollbar {
   scrollbar-width: none;
 }
@@ -192,7 +203,7 @@ img {
   }
 
   .page-transition-shell {
-    animation: page-route-enter 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    will-change: opacity, transform;
   }
 }
 
@@ -218,20 +229,6 @@ img {
   }
 }
 
-@keyframes page-route-enter {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-    filter: blur(3px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-    filter: blur(0);
-  }
-}
-
 .preview-spinner {
   display: block;
   width: 3.1rem;
@@ -244,6 +241,78 @@ img {
   box-shadow:
     0 14px 36px rgba(255, 159, 178, 0.14),
     0 6px 18px rgba(37, 48, 74, 0.12);
+}
+
+@media (hover: none) {
+  .hover-lift {
+    transition:
+      box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 220ms ease,
+      background-color 220ms ease;
+  }
+
+  .hover-lift:hover {
+    transform: none;
+  }
+}
+
+@media (min-width: 769px) and (prefers-reduced-motion: no-preference) {
+  .page-transition-shell {
+    animation: page-route-enter 120ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
+@media (max-width: 768px) {
+  html {
+    background:
+      radial-gradient(circle at top left, rgba(255, 159, 178, 0.22), transparent 16rem),
+      linear-gradient(180deg, #fffaf4 0%, #fff7f9 48%, #fdfcff 100%);
+  }
+
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .poster-surface {
+    box-shadow: 0 12px 28px rgba(216, 111, 136, 0.1);
+  }
+
+  .poster-glow::before {
+    opacity: 0.3;
+    filter: blur(8px);
+  }
+
+  .cute-orb {
+    display: none;
+  }
+
+  .glass-line {
+    background: rgba(255, 255, 255, 0.84);
+    backdrop-filter: none;
+  }
+
+  .shadow-cute {
+    box-shadow:
+      0 8px 18px rgba(255, 159, 178, 0.12),
+      0 2px 6px rgba(37, 48, 74, 0.06);
+  }
+
+  .deferred-section {
+    contain-intrinsic-size: 1px 520px;
+  }
+}
+
+@keyframes page-route-enter {
+  from {
+    opacity: 0.985;
+    transform: translateY(1px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes preview-spin {

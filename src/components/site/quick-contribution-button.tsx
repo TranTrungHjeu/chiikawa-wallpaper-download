@@ -135,7 +135,7 @@ async function submitContribution(input: {
   }
 }
 
-type QuickContributionButtonProps = {
+export type QuickContributionButtonProps = {
   className?: string;
   disabled?: boolean;
   turnstileSiteKey?: string;
@@ -143,6 +143,7 @@ type QuickContributionButtonProps = {
   size?: "sm" | "md" | "lg";
   label?: string;
   compact?: boolean;
+  autoOpenSignal?: number;
 };
 
 type FeedbackState = {
@@ -159,11 +160,13 @@ export function QuickContributionButton({
   size = "md",
   label = "Đóng góp",
   compact = false,
+  autoOpenSignal = 0,
 }: QuickContributionButtonProps) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const turnstileRef = useRef<TurnstileInstance>(null);
   const shouldRefreshAfterCloseRef = useRef(false);
+  const lastAutoOpenSignalRef = useRef(0);
   const [pending, setPending] = useState(false);
   const [feedback, setFeedback] = useState<FeedbackState | null>(null);
   const [isMounted, setIsMounted] = useState(false);
@@ -175,6 +178,18 @@ export function QuickContributionButton({
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (
+      autoOpenSignal <= 0 ||
+      autoOpenSignal === lastAutoOpenSignalRef.current
+    ) {
+      return;
+    }
+
+    lastAutoOpenSignalRef.current = autoOpenSignal;
+    inputRef.current?.click();
+  }, [autoOpenSignal]);
 
   const closeFeedback = useCallback(() => {
     const shouldRefresh = shouldRefreshAfterCloseRef.current;

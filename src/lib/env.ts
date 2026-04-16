@@ -25,6 +25,10 @@ export function getSiteUrl() {
   return getEnv("NEXT_PUBLIC_SITE_URL") || "http://localhost:3000";
 }
 
+export function getSupabaseUrl() {
+  return getEnv("NEXT_PUBLIC_SUPABASE_URL");
+}
+
 export function isPublicSupabaseConfigured() {
   return Boolean(
     getEnv("NEXT_PUBLIC_SUPABASE_URL") && getEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY")

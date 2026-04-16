@@ -11,6 +11,29 @@ import { getSupabaseServiceClient } from "@/lib/supabase/service";
 import type { AssetKind, AssetRecord, GalleryStats, PagedResult } from "@/lib/types";
 import { paginateArray } from "@/lib/utils";
 
+const LIST_ASSET_COLUMNS = [
+  "id",
+  "source_id",
+  "title",
+  "slug",
+  "description",
+  "kind",
+  "width",
+  "height",
+  "format",
+  "bytes",
+  "cloudinary_public_id",
+  "cloudinary_resource_type",
+  "storage_bucket",
+  "storage_path",
+  "secure_url",
+  "original_url",
+  "status",
+  "featured",
+  "created_at",
+  "updated_at",
+].join(",");
+
 function normalizeAsset(asset: Partial<AssetRecord>): AssetRecord {
   return {
     id: String(asset.id ?? ""),
@@ -53,7 +76,7 @@ async function queryAssets(
   const supabase = getSupabaseServiceClient();
   let query = supabase
     .from("assets")
-    .select("*", { count: "exact" })
+    .select(LIST_ASSET_COLUMNS, { count: "exact" })
     .eq("status", "published")
     .order("featured", { ascending: false })
     .order("created_at", { ascending: false });
@@ -71,7 +94,7 @@ async function queryAssets(
   }
 
   return {
-    items: (data ?? []).map((item) => normalizeAsset(item)),
+    items: ((data ?? []) as Partial<AssetRecord>[]).map((item) => normalizeAsset(item)),
     total: count ?? 0,
     page,
     pageSize,
@@ -116,32 +139,68 @@ export async function getAssetsStats(): Promise<GalleryStats> {
       }
 
       const supabase = getSupabaseServiceClient();
-      const { data, error } = await supabase
-        .from("assets")
-        .select("kind")
-        .eq("status", "published");
+      const [mobileCount, desktopCount, gifCount] = await Promise.all(
+        (["mobile", "desktop", "gif"] as const).map(async (kind) => {
+          const { count, error } = await supabase
+            .from("assets")
+            .select("id", { count: "exact", head: true })
+            .eq("status", "published")
+            .eq("kind", kind);
 
-      if (error) {
-        throw error;
-      }
+          if (error) {
+            throw error;
+          }
 
-      const counts = { mobile: 0, desktop: 0, gif: 0 };
-      for (const row of data ?? []) {
-        const kind = row.kind as AssetKind;
-        counts[kind] += 1;
-      }
+          return count ?? 0;
+        })
+      );
 
       return {
-        totalAssets: counts.mobile + counts.desktop + counts.gif,
-        totalMobile: counts.mobile,
-        totalDesktop: counts.desktop,
-        totalGif: counts.gif,
+        totalAssets: mobileCount + desktopCount + gifCount,
+        totalMobile: mobileCount,
+        totalDesktop: desktopCount,
+        totalGif: gifCount,
       };
     },
     ["assets-stats"],
     {
       revalidate: CACHE_REVALIDATE_SECONDS,
       tags: ["assets"],
+    }
+  )();
+}
+
+export async function getGalleryPageCount(
+  kind: AssetKind,
+  pageSize = GALLERY_PAGE_SIZE
+) {
+  return unstable_cache(
+    async () => {
+      if (!isServiceSupabaseConfigured()) {
+        const total = mockAssets.filter(
+          (asset) => asset.kind === kind && asset.status === "published"
+        ).length;
+
+        return Math.max(1, Math.ceil(total / pageSize));
+      }
+
+      const supabase = getSupabaseServiceClient();
+      const { count, error } = await supabase
+        .from("assets")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "published")
+        .eq("kind", kind);
+
+      if (error) {
+        throw error;
+      }
+
+      return Math.max(1, Math.ceil((count ?? 0) / pageSize));
+    },
+    ["gallery-page-count", kind, String(pageSize)],
+    {
+      revalidate: CACHE_REVALIDATE_SECONDS,
+      tags: ["assets", `assets:${kind}`],
     }
   )();
 }
@@ -156,7 +215,7 @@ export async function getAssetBySlug(slug: string) {
       const supabase = getSupabaseServiceClient();
       const { data, error } = await supabase
         .from("assets")
-        .select("*")
+        .select(LIST_ASSET_COLUMNS)
         .eq("slug", slug)
         .eq("status", "published")
         .maybeSingle();
@@ -165,7 +224,7 @@ export async function getAssetBySlug(slug: string) {
         throw error;
       }
 
-      return data ? normalizeAsset(data) : null;
+      return data ? normalizeAsset(data as Partial<AssetRecord>) : null;
     },
     ["asset-by-slug", slug],
     {
@@ -183,7 +242,7 @@ export async function getAssetById(id: string) {
   const supabase = getSupabaseServiceClient();
   const { data, error } = await supabase
     .from("assets")
-    .select("*")
+    .select(LIST_ASSET_COLUMNS)
     .eq("id", id)
     .maybeSingle();
 
@@ -191,7 +250,7 @@ export async function getAssetById(id: string) {
     throw error;
   }
 
-  return data ? normalizeAsset(data) : null;
+  return data ? normalizeAsset(data as Partial<AssetRecord>) : null;
 }
 
 export async function getRelatedAssets(asset: AssetRecord, limit = 3) {
@@ -219,7 +278,7 @@ export async function getAdminAssetsPage(
   const to = from + pageSize - 1;
   let query = supabase
     .from("assets")
-    .select("*", { count: "exact" })
+    .select(LIST_ASSET_COLUMNS, { count: "exact" })
     .order("created_at", { ascending: false });
 
   if (kind) {
@@ -233,7 +292,7 @@ export async function getAdminAssetsPage(
   }
 
   return {
-    items: (data ?? []).map((item) => normalizeAsset(item)),
+    items: ((data ?? []) as Partial<AssetRecord>[]).map((item) => normalizeAsset(item)),
     total: count ?? 0,
     page,
     pageSize,

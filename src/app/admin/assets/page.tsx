@@ -35,6 +35,8 @@ function AdminAssetsPagination({
     <nav className="flex flex-wrap items-center justify-center gap-2">
       <Link
         href={buildAssetsHref(kind, Math.max(page - 1, 1))}
+        prefetch={false}
+        scroll={false}
         className={cn(
           "inline-flex h-11 items-center justify-center border border-white/70 bg-white/82 px-4 text-sm font-black uppercase tracking-[0.12em] text-[var(--color-ink)] transition duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 hover:bg-white",
           page <= 1 && "pointer-events-none opacity-45"
@@ -47,6 +49,8 @@ function AdminAssetsPagination({
         <Link
           key={pageNumber}
           href={buildAssetsHref(kind, pageNumber)}
+          prefetch={false}
+          scroll={false}
           className={cn(
             "inline-flex h-11 min-w-11 items-center justify-center border border-white/70 bg-white/82 px-3 text-sm font-black text-[var(--color-ink)] transition duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 hover:bg-white",
             pageNumber === page &&
@@ -59,6 +63,8 @@ function AdminAssetsPagination({
 
       <Link
         href={buildAssetsHref(kind, Math.min(page + 1, pageCount))}
+        prefetch={false}
+        scroll={false}
         className={cn(
           "inline-flex h-11 items-center justify-center border border-white/70 bg-white/82 px-4 text-sm font-black uppercase tracking-[0.12em] text-[var(--color-ink)] transition duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 hover:bg-white",
           page >= pageCount && "pointer-events-none opacity-45"
@@ -121,6 +127,8 @@ export default async function AdminAssetsPage({
             <Link
               key={kind}
               href={buildAssetsHref(kind, 1)}
+              prefetch={false}
+              scroll={false}
               className={cn(
                 "inline-flex shrink-0 items-center gap-3 border px-4 py-3 text-sm font-black uppercase tracking-[0.14em]",
                 activeKind === kind

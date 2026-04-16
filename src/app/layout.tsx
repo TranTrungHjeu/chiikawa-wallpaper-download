@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Baloo_2, Nunito } from "next/font/google";
 
+import { PublicRouteFrame } from "@/components/site/public-route-frame";
 import { SITE_DESCRIPTION, SITE_NAME } from "@/lib/constants";
-import { getSiteUrl } from "@/lib/env";
+import { getSiteUrl, getSupabaseUrl } from "@/lib/env";
+import { getPrimaryRoutePrefetchManifest } from "@/lib/gallery";
 import "./globals.css";
 
 const displayFont = Baloo_2({
@@ -45,19 +47,36 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+const supabaseOrigin = getSupabaseUrl() ? new URL(getSupabaseUrl()).origin : null;
+const cloudinaryOrigin = "https://res.cloudinary.com";
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const prefetchManifest = await getPrimaryRoutePrefetchManifest();
+
   return (
     <html
       lang="vi"
       data-scroll-behavior="smooth"
       className={`${displayFont.variable} ${bodyFont.variable} h-full scroll-smooth antialiased`}
     >
+      <head>
+        {supabaseOrigin ? (
+          <>
+            <link rel="preconnect" href={supabaseOrigin} crossOrigin="" />
+            <link rel="dns-prefetch" href={supabaseOrigin} />
+          </>
+        ) : null}
+        <link rel="preconnect" href={cloudinaryOrigin} crossOrigin="" />
+        <link rel="dns-prefetch" href={cloudinaryOrigin} />
+      </head>
       <body className="min-h-full bg-[var(--color-cream)] text-slate-900">
-        {children}
+        <PublicRouteFrame prefetchManifest={prefetchManifest}>
+          {children}
+        </PublicRouteFrame>
       </body>
     </html>
   );

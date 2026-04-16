@@ -1,50 +1,27 @@
 import type { Metadata } from "next";
 
 import { CategoryPage } from "@/components/site/category-page";
-import { GALLERY_PAGE_SIZE } from "@/lib/constants";
-import { getAssetsPage } from "@/lib/data/assets";
-import { parsePositiveInt } from "@/lib/utils";
+import { GALLERY_METADATA, getGalleryPageView } from "@/lib/gallery";
 
 export const metadata: Metadata = {
-  title: "Chiikawa GIF",
-  description: "Bộ GIF Chiikawa dễ thương để lưu, chia sẻ và dùng trong reaction pack cá nhân.",
+  title: GALLERY_METADATA.gif.title,
+  description: GALLERY_METADATA.gif.description,
 };
 
-export default async function GifPage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  const query = await searchParams;
-  const page = parsePositiveInt(query.page, 1);
-  const pageResult = await getAssetsPage("gif", page, GALLERY_PAGE_SIZE);
-  const prefetchTargets = await Promise.all([
-    pageResult.page > 1
-      ? getAssetsPage("gif", pageResult.page - 1, GALLERY_PAGE_SIZE).then(
-          (result) => ({
-            href: `/gif?page=${result.page}`,
-            assets: result.items,
-          })
-        )
-      : null,
-    pageResult.page < pageResult.pageCount
-      ? getAssetsPage("gif", pageResult.page + 1, GALLERY_PAGE_SIZE).then(
-          (result) => ({
-            href: `/gif?page=${result.page}`,
-            assets: result.items,
-          })
-        )
-      : null,
-  ]);
+export default async function GifPage() {
+  const { basePath, pageResult, prefetchTargets } = await getGalleryPageView(
+    "gif",
+    1
+  );
 
   return (
     <CategoryPage
-      currentPath="/gif"
+      currentPath={basePath}
       title="GIF"
       description=""
       pageResult={pageResult}
       headerMode="pagination-only"
-      prefetchTargets={prefetchTargets.filter((target) => target !== null)}
+      prefetchTargets={prefetchTargets}
     />
   );
 }

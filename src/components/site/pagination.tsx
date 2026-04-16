@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { CaretLeft, CaretRight } from "@phosphor-icons/react/dist/ssr";
 
-import { cn } from "@/lib/utils";
+import { buildGalleryPageHref, cn } from "@/lib/utils";
 
 export function Pagination({
   basePath,
@@ -25,7 +25,9 @@ export function Pagination({
   return (
     <nav className="flex flex-wrap items-center justify-center gap-2">
       <Link
-        href={`${basePath}?page=${Math.max(page - 1, 1)}`}
+        href={buildGalleryPageHref(basePath, Math.max(page - 1, 1))}
+        prefetch={false}
+        scroll={false}
         className={cn(
           "inline-flex h-10 items-center justify-center rounded-none border border-white/70 bg-white/80 px-3 text-[13px] font-black uppercase tracking-[0.08em] text-[var(--color-ink)] backdrop-blur transition duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-white md:h-11 md:px-4 md:text-sm md:font-bold md:tracking-normal",
           page <= 1 && "pointer-events-none opacity-45"
@@ -41,7 +43,9 @@ export function Pagination({
             <span className="px-1 text-sm font-black text-slate-400">...</span>
           ) : null}
           <Link
-            href={`${basePath}?page=${pageNumber}`}
+            href={buildGalleryPageHref(basePath, pageNumber)}
+            prefetch={false}
+            scroll={false}
             className={cn(
               "inline-flex h-10 min-w-10 items-center justify-center rounded-none border border-white/70 bg-white/80 px-2 text-[13px] font-black text-[var(--color-ink)] backdrop-blur transition duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-white md:h-11 md:w-11 md:px-0 md:text-sm md:font-bold",
               pageNumber === page &&
@@ -54,7 +58,9 @@ export function Pagination({
       ))}
 
       <Link
-        href={`${basePath}?page=${Math.min(page + 1, pageCount)}`}
+        href={buildGalleryPageHref(basePath, Math.min(page + 1, pageCount))}
+        prefetch={false}
+        scroll={false}
         className={cn(
           "inline-flex h-10 items-center justify-center rounded-none border border-white/70 bg-white/80 px-3 text-[13px] font-black uppercase tracking-[0.08em] text-[var(--color-ink)] backdrop-blur transition duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-white md:h-11 md:px-4 md:text-sm md:font-bold md:tracking-normal",
           page >= pageCount && "pointer-events-none opacity-45"

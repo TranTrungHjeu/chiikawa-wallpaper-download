@@ -1,4 +1,4 @@
-import { AssetCard } from "@/components/site/asset-card";
+import { AssetGridClient } from "@/components/site/asset-grid-client";
 import type { AssetRecord } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -38,6 +38,17 @@ export function getAssetGridPrefetchWidth(gridPreset: AssetGridPreset) {
   return 480;
 }
 
+function getAssetGridClassName(gridPreset: AssetGridPreset) {
+  return cn(
+    "grid gap-2.5 md:gap-3",
+    gridPreset === "desktop-two-up" || gridPreset === "home-featured-two-up"
+      ? "grid-cols-1 md:grid-cols-2"
+      : gridPreset === "home-latest-five-up"
+        ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-5"
+        : "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+  );
+}
+
 export function AssetGrid({
   assets,
   emptyTitle = "Chưa có tài nguyên hiển thị",
@@ -63,26 +74,13 @@ export function AssetGrid({
   }
 
   const imageSizes = getAssetGridImageSizes(gridPreset);
+  const gridClassName = getAssetGridClassName(gridPreset);
 
   return (
-    <div
-      className={cn(
-        "grid gap-2.5 md:gap-3",
-        gridPreset === "desktop-two-up" || gridPreset === "home-featured-two-up"
-          ? "grid-cols-1 md:grid-cols-2"
-          : gridPreset === "home-latest-five-up"
-            ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-5"
-            : "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
-      )}
-    >
-      {assets.map((asset, index) => (
-        <AssetCard
-          key={asset.id}
-          asset={asset}
-          index={index}
-          imageSizes={imageSizes}
-        />
-      ))}
-    </div>
+    <AssetGridClient
+      assets={assets}
+      imageSizes={imageSizes}
+      gridClassName={gridClassName}
+    />
   );
 }

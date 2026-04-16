@@ -68,6 +68,10 @@ export function getAssetDownloadRoute(id: string) {
   return `/api/assets/${id}/download`;
 }
 
+export function buildGalleryPageHref(basePath: string, page: number) {
+  return page <= 1 ? basePath : `${basePath}/${page}`;
+}
+
 export function parsePositiveInt(
   value: string | string[] | undefined,
   fallback = 1

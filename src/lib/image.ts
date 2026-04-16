@@ -1,5 +1,15 @@
 import type { AssetRecord } from "@/lib/types";
 
+type AssetImageSource = Pick<
+  AssetRecord,
+  | "cloudinary_public_id"
+  | "cloudinary_resource_type"
+  | "secure_url"
+  | "original_url"
+  | "storage_bucket"
+  | "storage_path"
+>;
+
 function buildSupabaseStoragePublicUrl(bucket: string, storagePath: string) {
   const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
 
@@ -14,7 +24,7 @@ function buildSupabaseStoragePublicUrl(bucket: string, storagePath: string) {
 }
 
 export function getAssetThumbnailUrl(
-  asset: AssetRecord,
+  asset: AssetImageSource,
   _variant: "card" | "detail" = "card"
 ) {
   void _variant;
@@ -44,5 +54,5 @@ export function getAssetOriginalImageUrl(asset: AssetRecord) {
 }
 
 export function getAssetPreviewPriority(index: number) {
-  return index < 2;
+  return index === 0;
 }

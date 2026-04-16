@@ -4,8 +4,7 @@ import { DownloadSimple } from "@phosphor-icons/react/dist/ssr";
 import { notFound } from "next/navigation";
 
 import { AssetGrid } from "@/components/site/asset-grid";
-import { QuickContributionButton } from "@/components/site/quick-contribution-button";
-import { SiteShell } from "@/components/site/site-shell";
+import { LazyQuickContributionButton } from "@/components/site/lazy-quick-contribution-button";
 import { Badge } from "@/components/ui/badge";
 import { linkButtonClassName } from "@/components/ui/button";
 import { getAssetBySlug, getRelatedAssets } from "@/lib/data/assets";
@@ -61,7 +60,7 @@ export default async function AssetDetailPage({
   const turnstileSiteKey = getTurnstileSiteKey();
 
   return (
-    <SiteShell currentPath={`/${asset.kind}`}>
+    <>
       <section className="px-4 pb-10 pt-4 md:px-8">
         <div className="poster-surface mx-auto grid max-w-7xl gap-8 rounded-none border border-white/70 p-6 md:grid-cols-[0.95fr_1.05fr] md:p-8">
           <div className="space-y-5">
@@ -89,7 +88,7 @@ export default async function AssetDetailPage({
                 <DownloadSimple className="h-5 w-5" weight="bold" />
                 Tải gốc
               </a>
-              <QuickContributionButton
+              <LazyQuickContributionButton
                 label="Gửi ảnh"
                 variant="secondary"
                 size="lg"
@@ -130,6 +129,6 @@ export default async function AssetDetailPage({
           />
         </div>
       </section>
-    </SiteShell>
+    </>
   );
 }

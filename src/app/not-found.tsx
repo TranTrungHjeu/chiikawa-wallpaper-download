@@ -1,10 +1,8 @@
 import Link from "next/link";
 
-import { SiteShell } from "@/components/site/site-shell";
-
 export default function NotFound() {
   return (
-    <SiteShell>
+    <>
       <section className="px-4 py-24 md:px-8">
         <div className="mx-auto max-w-4xl rounded-none border border-white/70 bg-white/85 p-10 text-center shadow-cute">
           <p className="text-xs font-black uppercase tracking-[0.22em] text-slate-500">
@@ -21,6 +19,6 @@ export default function NotFound() {
           </Link>
         </div>
       </section>
-    </SiteShell>
+    </>
   );
 }
